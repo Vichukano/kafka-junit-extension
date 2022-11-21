@@ -1,4 +1,4 @@
-package ru.vichukano.kafka.junit.extension;
+package io.github.kafka.junit.extension;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
-import ru.vichukano.kafka.junit.extension.EnableTestConsumer;
-import ru.vichukano.kafka.junit.extension.TestConsumer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;

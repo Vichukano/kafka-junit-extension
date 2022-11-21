@@ -1,4 +1,4 @@
-package ru.vichukano.kafka.junit.extension;
+package io.github.kafka.junit.extension;
 
 public class TestConsumerConditionException extends RuntimeException {
 

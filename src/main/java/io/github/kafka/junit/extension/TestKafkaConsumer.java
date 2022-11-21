@@ -1,4 +1,4 @@
-package ru.vichukano.kafka.junit.extension;
+package io.github.kafka.junit.extension;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

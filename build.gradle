@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'ru.vichukano.kafka.junit.extension'
+group = 'io.github'
 version = '1.0.0'
 sourceCompatibility = '11'
 
