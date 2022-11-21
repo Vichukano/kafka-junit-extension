@@ -1,4 +1,4 @@
-package ru.vichukano.kafka.junit.extension;
+package io.github.kafka.junit.extension;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import java.lang.annotation.ElementType;
