@@ -14,18 +14,22 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 class TestKafkaConsumer {
+    private static final int TIMEOUT_MILLIS = 300;
     @Getter
     private final BlockingQueue<ConsumerRecord<Object, Object>> recordsQueue;
     private final KafkaConsumer<Object, Object> consumer;
     private final int partitions;
     private final String topic;
-    private final AtomicBoolean consumerOn = new AtomicBoolean(false);
+    private final AtomicBoolean isConsumerOn = new AtomicBoolean(false);
+    private final Executor executor = Executors.newSingleThreadExecutor();
 
     private TestKafkaConsumer(BlockingQueue<ConsumerRecord<Object, Object>> recordsQueue,
                               KafkaConsumer<Object, Object> consumer,
@@ -40,53 +44,13 @@ class TestKafkaConsumer {
     @SneakyThrows
     public void start() {
         log.debug("Start test kafka consumer");
-        consumer.subscribe(List.of(topic));
-        consumerOn.set(true);
-        new Thread(() -> {
-            boolean isAssignment = false;
-            while (consumerOn.get()) {
-                while (!isAssignment) {
-                    var records = consumer.poll(Duration.ofMillis(100));
-                    final Set<TopicPartition> assignment = consumer.assignment();
-                    log.trace("Assignments: " + assignment.size());
-                    if (assignment.size() == partitions) {
-                        isAssignment = true;
-                    } else {
-                        try {
-                            TimeUnit.MILLISECONDS.sleep(200);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-                    if (!records.isEmpty()) {
-                        for (var record : records) {
-                            try {
-                                recordsQueue.put(record);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-                        consumer.commitSync();
-                    }
-                }
-                var records = consumer.poll(Duration.ofMillis(100));
-                if (!records.isEmpty()) {
-                    for (var record : records) {
-                        try {
-                            recordsQueue.put(record);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-                    consumer.commitSync();
-                }
-            }
-        }).start();
+        isConsumerOn.set(true);
+        executor.execute(processConsumer());
     }
 
     public void stop() {
         log.debug("Stop test kafka consumer");
-        consumerOn.set(false);
+        isConsumerOn.set(false);
         log.debug("Test kafka consumer stopped");
     }
 
@@ -112,6 +76,62 @@ class TestKafkaConsumer {
         var testConsumer = createConsumer(topic, partitions, commonProps);
         log.trace("Created test consumer: {}", testConsumer);
         return testConsumer;
+    }
+
+    private Runnable processConsumer() {
+        return () -> {
+            log.trace("Start to process consumer");
+            consumer.subscribe(List.of(topic));
+            while (isConsumerOn.get()) {
+                processAssignment();
+                processRecords();
+            }
+            log.trace("Consumer processing finished");
+        };
+    }
+
+    private void processRecords() {
+        var records = consumer.poll(Duration.ofMillis(TIMEOUT_MILLIS));
+        if (!records.isEmpty()) {
+            for (var record : records) {
+                try {
+                    recordsQueue.put(record);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            consumer.commitSync();
+        }
+    }
+
+    private void processAssignment() {
+        boolean isAssignment = false;
+        int tries = 30;
+        while (!isAssignment || tries != 0) {
+            var records = consumer.poll(Duration.ofMillis(TIMEOUT_MILLIS));
+            final Set<TopicPartition> assignment = consumer.assignment();
+            log.trace("Assignments: " + assignment.size());
+            if (assignment.size() == partitions) {
+                isAssignment = true;
+            } else {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(TIMEOUT_MILLIS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            if (!records.isEmpty()) {
+                for (var record : records) {
+                    try {
+                        recordsQueue.put(record);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                consumer.commitSync();
+            }
+            --tries;
+        }
     }
 
     private static TestKafkaConsumer createConsumer(String topic,

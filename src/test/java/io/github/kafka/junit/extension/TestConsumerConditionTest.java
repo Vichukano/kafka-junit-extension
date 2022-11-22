@@ -27,7 +27,8 @@ class TestConsumerConditionTest {
         topic = "second",
         keyDeserializer = IntegerDeserializer.class,
         valueDeserializer = IntegerDeserializer.class,
-        bootstrapServers = "${bootstrap-servers}"
+        bootstrapServers = "${bootstrap-servers}",
+        partitions = 1
     )
     private BlockingQueue<ConsumerRecord<Integer, Integer>> intRecordsQueue;
 
