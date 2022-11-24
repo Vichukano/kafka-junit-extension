@@ -17,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class TestConsumerCondition implements ExecutionCondition, BeforeTestExecutionCallback, AfterAllCallback {
-    private final Map<String, TestKafkaConsumer> testConsumers = new ConcurrentHashMap<>();
+public class KafkaQueuesCondition implements ExecutionCondition, BeforeTestExecutionCallback, AfterAllCallback {
+    private final Map<String, KafkaQueuesProvider> testConsumers = new ConcurrentHashMap<>();
 
     @SneakyThrows
     @Override
@@ -45,7 +45,7 @@ public class TestConsumerCondition implements ExecutionCondition, BeforeTestExec
 
     private void processTestInstance(Object testInstance) {
         Arrays.stream(testInstance.getClass().getDeclaredFields())
-            .filter(f -> Arrays.stream(f.getAnnotations()).anyMatch(a -> a instanceof TestConsumer))
+            .filter(f -> Arrays.stream(f.getAnnotations()).anyMatch(a -> a instanceof OutputQueue))
             .forEach(f -> processAnnotatedField(f, testInstance));
     }
 
@@ -53,15 +53,15 @@ public class TestConsumerCondition implements ExecutionCondition, BeforeTestExec
         try {
             log.trace("Start to process field: {} of object: {}", field, testInstance);
             if (!field.getType().isAssignableFrom(BlockingQueue.class)) {
-                throw new TestConsumerConditionException("Wrong class, should be: " + BlockingQueue.class);
+                throw new KafkaQueuesException("Wrong class, should be: " + BlockingQueue.class);
             }
             if (testConsumers.get(field.getName()) != null) {
                 log.debug("Test consumer already configured");
                 field.setAccessible(true);
                 field.set(testInstance, testConsumers.get(field.getName()).getRecordsQueue());
             } else {
-                final TestConsumer annotation = field.getAnnotation(TestConsumer.class);
-                TestKafkaConsumer tk = consumer(annotation);
+                final OutputQueue annotation = field.getAnnotation(OutputQueue.class);
+                KafkaQueuesProvider tk = consumer(annotation);
                 tk.start();
                 testConsumers.put(field.getName(), tk);
                 final BlockingQueue<ConsumerRecord<Object, Object>> recordsQueue = tk.getRecordsQueue();
@@ -70,11 +70,11 @@ public class TestConsumerCondition implements ExecutionCondition, BeforeTestExec
                 log.trace("Finish processing for object: {}, field: {}", testInstance, field);
             }
         } catch (Exception e) {
-            throw new TestConsumerConditionException("Failed to process annotated field", e);
+            throw new KafkaQueuesException("Failed to process annotated field", e);
         }
     }
 
-    private TestKafkaConsumer consumer(TestConsumer annotation) {
+    private KafkaQueuesProvider consumer(OutputQueue annotation) {
         final String[] additionalProperties = annotation.additionalProperties();
         final String bootstrapServers = annotation.bootstrapServers();
         final String servers;
@@ -93,9 +93,9 @@ public class TestConsumerCondition implements ExecutionCondition, BeforeTestExec
         final String topic = annotation.topic();
         final Class<?> keyDes = annotation.keyDeserializer();
         final Class<?> valDes = annotation.valueDeserializer();
-        TestKafkaConsumer testKafkaConsumer;
+        KafkaQueuesProvider testKafkaConsumer;
         if (additionalProperties.length == 0) {
-            testKafkaConsumer = TestKafkaConsumer.consumer(
+            testKafkaConsumer = KafkaQueuesProvider.consumer(
                 topic,
                 servers,
                 partitions,
@@ -103,7 +103,7 @@ public class TestConsumerCondition implements ExecutionCondition, BeforeTestExec
                 valDes
             );
         } else {
-            testKafkaConsumer = TestKafkaConsumer.consumerWithAdditionalProperties(
+            testKafkaConsumer = KafkaQueuesProvider.consumerWithAdditionalProperties(
                 topic,
                 servers,
                 partitions,

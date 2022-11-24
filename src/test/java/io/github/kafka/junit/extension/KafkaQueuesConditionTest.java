@@ -18,12 +18,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-@EnableTestConsumer
+@EnableKafkaQueues
 @EmbeddedKafka(topics = {"first", "second"})
-class TestConsumerConditionTest {
-    @TestConsumer(topic = "first")
+class KafkaQueuesConditionTest {
+    @OutputQueue(topic = "first")
     private BlockingQueue<ConsumerRecord<String, String>> stringRecordsQueue;
-    @TestConsumer(
+    @OutputQueue(
         topic = "second",
         keyDeserializer = IntegerDeserializer.class,
         valueDeserializer = IntegerDeserializer.class,

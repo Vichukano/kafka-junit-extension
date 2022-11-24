@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TestConsumer {
+public @interface OutputQueue {
     String topic();
 
     Class<?> keyDeserializer() default StringDeserializer.class;
