@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
-class TestKafkaConsumer {
+class KafkaQueuesProvider {
     private static final int TIMEOUT_MILLIS = 300;
     @Getter
     private final BlockingQueue<ConsumerRecord<Object, Object>> recordsQueue;
@@ -31,10 +31,10 @@ class TestKafkaConsumer {
     private final AtomicBoolean isConsumerOn = new AtomicBoolean(false);
     private final Executor executor = Executors.newSingleThreadExecutor();
 
-    private TestKafkaConsumer(BlockingQueue<ConsumerRecord<Object, Object>> recordsQueue,
-                              KafkaConsumer<Object, Object> consumer,
-                              int partitions,
-                              String topic) {
+    private KafkaQueuesProvider(BlockingQueue<ConsumerRecord<Object, Object>> recordsQueue,
+                                KafkaConsumer<Object, Object> consumer,
+                                int partitions,
+                                String topic) {
         this.recordsQueue = recordsQueue;
         this.consumer = consumer;
         this.partitions = partitions;
@@ -54,22 +54,22 @@ class TestKafkaConsumer {
         log.debug("Test kafka consumer stopped");
     }
 
-    public static TestKafkaConsumer consumer(String topic,
-                                             String bootstrapServers,
-                                             int partitions,
-                                             Class<?> keyDeserializerClass,
-                                             Class<?> valueDeserializerClass
+    public static KafkaQueuesProvider consumer(String topic,
+                                               String bootstrapServers,
+                                               int partitions,
+                                               Class<?> keyDeserializerClass,
+                                               Class<?> valueDeserializerClass
     ) {
         var props = commonProps(bootstrapServers, keyDeserializerClass, valueDeserializerClass);
         return createConsumer(topic, partitions, props);
     }
 
-    public static TestKafkaConsumer consumerWithAdditionalProperties(String topic,
-                                                                     String bootstrapServers,
-                                                                     int partitions,
-                                                                     Class<?> keyDeserializerClass,
-                                                                     Class<?> valueDeserializerClass,
-                                                                     Map<String, Object> props) {
+    public static KafkaQueuesProvider consumerWithAdditionalProperties(String topic,
+                                                                       String bootstrapServers,
+                                                                       int partitions,
+                                                                       Class<?> keyDeserializerClass,
+                                                                       Class<?> valueDeserializerClass,
+                                                                       Map<String, Object> props) {
         log.trace("Start to create test consumer for topic: {} and props: {}", topic, props);
         var commonProps = commonProps(bootstrapServers, keyDeserializerClass, valueDeserializerClass);
         commonProps.putAll(props);
@@ -134,13 +134,13 @@ class TestKafkaConsumer {
         }
     }
 
-    private static TestKafkaConsumer createConsumer(String topic,
-                                                    int partitions,
-                                                    Properties props) {
+    private static KafkaQueuesProvider createConsumer(String topic,
+                                                      int partitions,
+                                                      Properties props) {
         log.trace("Start to create test consumer for topic: {}", topic);
         var queue = new LinkedBlockingQueue<ConsumerRecord<Object, Object>>();
         var consumer = new KafkaConsumer<>(props);
-        var testConsumer = new TestKafkaConsumer(queue, consumer, partitions, topic);
+        var testConsumer = new KafkaQueuesProvider(queue, consumer, partitions, topic);
         log.trace("Created test consumer: {}", testConsumer);
         return testConsumer;
     }
