@@ -1,8 +1,11 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'signing'
+    id 'io.codearte.nexus-staging' version '0.30.0'
 }
 
-group = 'io.github'
+group = 'io.github.vichukano'
 version = '1.0.0'
 sourceCompatibility = '11'
 
@@ -35,4 +38,73 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+tasks.withType(Javadoc) {
+    failOnError false
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = "kafka-junit-extension"
+            groupId = "io.github.vichukano"
+            version = "1.0.0"
+            from(components["java"])
+            pom {
+                packaging = "jar"
+                name.set("kafka-junit-extension")
+                url.set("https://github.com/Vichukano/kafka-junit-extension")
+                description.set("Library for testing")
+
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:https://github.com/Vichukano/kafka-junit-extension.git")
+                    developerConnection.set("scm:git@github.com:Vichukano/kafka-junit-extension.git")
+                    url.set("https://github.com/Vichukano/kafka-junit-extension")
+                }
+
+                developers {
+                    developer {
+                        id.set("Vichukano")
+                        name.set("Victor Chukanov")
+                        email.set("vichukano@gmail.com")
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = project.properties["ossrhUsername"].toString()
+                password = project.properties["ossrhPassword"].toString()
+            }
+        }
+    }
+}
+
+signing {
+    useGpgCmd()
+    sign publishing.publications.mavenJava
+}
+
+nexusStaging {
+    serverUrl = "https://s01.oss.sonatype.org/service/local/"
+    username = project.properties["ossrhUsername"].toString()
+    password = project.properties["ossrhPassword"].toString()
 }

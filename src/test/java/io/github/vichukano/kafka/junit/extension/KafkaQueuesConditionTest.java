@@ -1,5 +1,7 @@
-package io.github.kafka.junit.extension;
+package io.github.vichukano.kafka.junit.extension;
 
+import io.github.vichukano.kafka.junit.extension.EnableKafkaQueues;
+import io.github.vichukano.kafka.junit.extension.OutputQueue;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
