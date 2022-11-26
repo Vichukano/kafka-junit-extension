@@ -1,4 +1,4 @@
-package io.github.kafka.junit.extension;
+package io.github.vichukano.kafka.junit.extension;
 
 import org.apache.kafka.common.serialization.StringDeserializer;
 import java.lang.annotation.ElementType;

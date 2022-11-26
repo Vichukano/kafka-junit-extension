@@ -1,4 +1,4 @@
-package io.github.kafka.junit.extension;
+package io.github.vichukano.kafka.junit.extension;
 
 public class KafkaQueuesException extends RuntimeException {
 
