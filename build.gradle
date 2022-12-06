@@ -5,9 +5,9 @@ plugins {
     id 'io.codearte.nexus-staging' version '0.30.0'
 }
 
-group = 'io.github.vichukano'
-version = '1.0.0'
-sourceCompatibility = '11'
+group = "io.github.vichukano"
+version = "1.1.0"
+sourceCompatibility = "11"
 
 configurations {
     compileOnly {
@@ -56,7 +56,7 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = "kafka-junit-extension"
             groupId = "io.github.vichukano"
-            version = "1.0.0"
+            version = "1.1.0"
             from(components["java"])
             pom {
                 packaging = "jar"
