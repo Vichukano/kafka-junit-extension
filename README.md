@@ -21,3 +21,15 @@ where K is the key type and V is the message type, and mark it with the ```@Outp
 
 
 Usage [example](https://github.com/Vichukano/kafka-junit-extension/blob/main/src/test/java/io/github/vichukano/kafka/junit/extension/KafkaQueuesConditionTest.java)
+
+---
+
+### maven
+<dependency>
+    <groupId>io.github.vichukano</groupId>
+    <artifactId>kafka-junit-extension</artifactId>
+    <version>1.1.0</version>
+</dependency>
+
+### gradle
+implementation group: 'io.github.vichukano', name: 'kafka-junit-extension', version: '1.1.0'
