@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +111,7 @@ class KafkaOutputQueueProvider {
         while (!isAssignment || tries != 0) {
             var records = consumer.poll(Duration.ofMillis(TIMEOUT_MILLIS));
             final Set<TopicPartition> assignment = consumer.assignment();
-            log.trace("Assignments: " + assignment.size());
+            log.trace("Assignments: {}", assignment.size());
             if (assignment.size() == partitions) {
                 isAssignment = true;
             } else {
@@ -140,14 +141,12 @@ class KafkaOutputQueueProvider {
         log.trace("Start to create test consumer for topic: {}", topic);
         var queue = new LinkedBlockingQueue<ConsumerRecord<Object, Object>>();
         var consumer = new KafkaConsumer<>(props);
-        var testConsumer = new KafkaOutputQueueProvider(queue, consumer, partitions, topic);
-        log.trace("Created test consumer: {}", testConsumer);
-        return testConsumer;
+        return new KafkaOutputQueueProvider(queue, consumer, partitions, topic);
     }
 
     private static Properties commonProps(String bootstrapServers,
-                                                   Class<?> keyDeserializerClass,
-                                                   Class<?> valueDeserializerClass) {
+                                          Class<?> keyDeserializerClass,
+                                          Class<?> valueDeserializerClass) {
         var consumerProps = new Properties();
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializerClass);
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializerClass);

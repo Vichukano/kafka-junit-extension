@@ -1,6 +1,7 @@
 package io.github.vichukano.kafka.junit.extension;
 
 import org.apache.kafka.common.serialization.StringDeserializer;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

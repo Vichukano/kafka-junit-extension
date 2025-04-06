@@ -1,13 +1,17 @@
+import com.vanniktech.maven.publish.SonatypeHost
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
+
 plugins {
     id 'java'
-    id 'maven-publish'
     id 'signing'
-    id 'io.codearte.nexus-staging' version '0.30.0'
+    id "com.vanniktech.maven.publish" version "0.31.0-rc2"
 }
 
+def ver = "1.2.1"
+def projectName = "kafka-junit-extension"
 group = "io.github.vichukano"
-version = "1.1.0"
-sourceCompatibility = "11"
+version = ver
 
 configurations {
     compileOnly {
@@ -20,20 +24,20 @@ repositories {
 }
 
 dependencies {
-    def lombokVersion = '1.18.2'
-    def springKafkaVersion = "2.9.2"
+    def lombokVersion = '1.18.36'
+    def springKafkaVersion = "3.3.4"
     def junitVersion = "5.9.1"
-    implementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-    implementation 'org.apache.kafka:kafka-clients:3.2.3'
-    implementation "org.projectlombok:lombok:${lombokVersion}"
-    implementation 'org.slf4j:slf4j-api:2.0.4'
+    compileOnly "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    compileOnly "org.apache.kafka:kafka-clients:3.8.1"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.slf4j:slf4j-api:2.0.17"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testImplementation "org.springframework.kafka:spring-kafka-test:${springKafkaVersion}"
     testImplementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
-    testImplementation 'org.assertj:assertj-core:3.23.1'
+    testImplementation "org.assertj:assertj-core:3.23.1"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
-    testImplementation 'ch.qos.logback:logback-classic:1.4.5'
+    testImplementation "ch.qos.logback:logback-classic:1.4.5"
 }
 
 test {
@@ -41,70 +45,47 @@ test {
 }
 
 java {
-    withJavadocJar()
-    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
-tasks.withType(Javadoc) {
+tasks.withType(Javadoc).configureEach {
     failOnError false
-    options.addStringOption('encoding', 'UTF-8')
-    options.addStringOption('charSet', 'UTF-8')
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = "kafka-junit-extension"
-            groupId = "io.github.vichukano"
-            version = "1.1.0"
-            from(components["java"])
-            pom {
-                packaging = "jar"
-                name.set("kafka-junit-extension")
-                url.set("https://github.com/Vichukano/kafka-junit-extension")
-                description.set("Library for testing")
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:https://github.com/Vichukano/kafka-junit-extension.git")
-                    developerConnection.set("scm:git@github.com:Vichukano/kafka-junit-extension.git")
-                    url.set("https://github.com/Vichukano/kafka-junit-extension")
-                }
-
-                developers {
-                    developer {
-                        id.set("Vichukano")
-                        name.set("Victor Chukanov")
-                        email.set("vichukano@gmail.com")
-                    }
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = project.properties["ossrhUsername"].toString()
-                password = project.properties["ossrhPassword"].toString()
-            }
-        }
-    }
 }
 
 signing {
     useGpgCmd()
-    sign publishing.publications.mavenJava
+    sign publishing.publications
 }
 
-nexusStaging {
-    serverUrl = "https://s01.oss.sonatype.org/service/local/"
-    username = project.properties["ossrhUsername"].toString()
-    password = project.properties["ossrhPassword"].toString()
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
+    coordinates(group, projectName, ver)
+    pom {
+        packaging = "jar"
+        name = projectName
+        url = "https://github.com/Vichukano/kafka-junit-extension"
+        description = "Library for testing"
+
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        }
+
+        scm {
+            connection = "scm:https://github.com/Vichukano/kafka-junit-extension.git"
+            developerConnection = "scm:git@github.com:Vichukano/kafka-junit-extension.git"
+            url = "https://github.com/Vichukano/kafka-junit-extension"
+        }
+
+        developers {
+            developer {
+                id = "Vichukano"
+                name = "Victor Chukanov"
+                email = "vichukano@gmail.com"
+            }
+        }
+    }
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Map;
@@ -52,11 +53,11 @@ public class KafkaQueuesCondition implements ExecutionCondition, BeforeTestExecu
 
     private void processTestInstance(Object testInstance) {
         Arrays.stream(testInstance.getClass().getDeclaredFields())
-            .filter(f -> Arrays.stream(f.getAnnotations()).anyMatch(a -> a instanceof OutputQueue))
-            .forEach(f -> processOutputQueueAnnotatedField(f, testInstance));
+                .filter(f -> Arrays.stream(f.getAnnotations()).anyMatch(a -> a instanceof OutputQueue))
+                .forEach(f -> processOutputQueueAnnotatedField(f, testInstance));
         Arrays.stream(testInstance.getClass().getDeclaredFields())
-            .filter(f -> Arrays.stream(f.getAnnotations()).anyMatch(a -> a instanceof InputQueue))
-            .forEach(f -> processInputQueueAnnotatedField(f, testInstance));
+                .filter(f -> Arrays.stream(f.getAnnotations()).anyMatch(a -> a instanceof InputQueue))
+                .forEach(f -> processInputQueueAnnotatedField(f, testInstance));
     }
 
     private void processOutputQueueAnnotatedField(Field field, Object testInstance) {
@@ -122,21 +123,21 @@ public class KafkaQueuesCondition implements ExecutionCondition, BeforeTestExecu
         KafkaOutputQueueProvider testKafkaConsumer;
         if (additionalProperties.length == 0) {
             testKafkaConsumer = KafkaOutputQueueProvider.consumer(
-                topic,
-                servers,
-                partitions,
-                keyDes,
-                valDes
+                    topic,
+                    servers,
+                    partitions,
+                    keyDes,
+                    valDes
             );
         } else {
             testKafkaConsumer = KafkaOutputQueueProvider.consumerWithAdditionalProperties(
-                topic,
-                servers,
-                partitions,
-                keyDes,
-                valDes,
-                Arrays.stream(additionalProperties).map(p -> p.split("="))
-                    .collect(Collectors.toMap(s -> s[0], s -> resolveProperty(s[1])))
+                    topic,
+                    servers,
+                    partitions,
+                    keyDes,
+                    valDes,
+                    Arrays.stream(additionalProperties).map(p -> p.split("="))
+                            .collect(Collectors.toMap(s -> s[0], s -> resolveProperty(s[1])))
             );
         }
         return testKafkaConsumer;
@@ -154,17 +155,17 @@ public class KafkaQueuesCondition implements ExecutionCondition, BeforeTestExecu
         KafkaInputQueueProvider testKafkaProducer;
         if (additionalProperties.length == 0) {
             testKafkaProducer = KafkaInputQueueProvider.producer(
-                servers,
-                keyDes,
-                valDes
+                    servers,
+                    keyDes,
+                    valDes
             );
         } else {
             testKafkaProducer = KafkaInputQueueProvider.producer(
-                servers,
-                keyDes,
-                valDes,
-                Arrays.stream(additionalProperties).map(p -> p.split("="))
-                    .collect(Collectors.toMap(s -> s[0], s -> resolveProperty(s[1])))
+                    servers,
+                    keyDes,
+                    valDes,
+                    Arrays.stream(additionalProperties).map(p -> p.split("="))
+                            .collect(Collectors.toMap(s -> s[0], s -> resolveProperty(s[1])))
             );
         }
         return testKafkaProducer;
