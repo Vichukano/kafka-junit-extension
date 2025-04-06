@@ -2,6 +2,7 @@ package io.github.vichukano.kafka.junit.extension;
 
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;

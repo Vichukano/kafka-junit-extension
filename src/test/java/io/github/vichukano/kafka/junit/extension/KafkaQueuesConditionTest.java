@@ -13,6 +13,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -27,11 +28,11 @@ class KafkaQueuesConditionTest {
     @OutputQueue(topic = "first")
     private BlockingQueue<ConsumerRecord<String, String>> stringRecordsQueue;
     @OutputQueue(
-        topic = "second",
-        keyDeserializer = IntegerDeserializer.class,
-        valueDeserializer = IntegerDeserializer.class,
-        bootstrapServers = "${bootstrap-servers}",
-        partitions = 1
+            topic = "second",
+            keyDeserializer = IntegerDeserializer.class,
+            valueDeserializer = IntegerDeserializer.class,
+            bootstrapServers = "${bootstrap-servers}",
+            partitions = 1
     )
     private BlockingQueue<ConsumerRecord<Integer, Integer>> intRecordsQueue;
     @InputQueue
@@ -39,17 +40,17 @@ class KafkaQueuesConditionTest {
     @OutputQueue(topic = "third")
     private BlockingQueue<ConsumerRecord<String, String>> thirdOutputQueue;
     @InputQueue(
-        additionalProperties = {"retries=1"},
-        bootstrapServers = "${bootstrap-servers}",
-        keySerializer = IntegerSerializer.class,
-        valueSerializer = IntegerSerializer.class
+            additionalProperties = {"retries=1"},
+            bootstrapServers = "${bootstrap-servers}",
+            keySerializer = IntegerSerializer.class,
+            valueSerializer = IntegerSerializer.class
     )
     private BlockingQueue<ProducerRecord<Integer, Integer>> fourthInputQueue;
     @OutputQueue(
-        topic = "fourth",
-        additionalProperties = {"enable.auto.commit=false"},
-        keyDeserializer = IntegerDeserializer.class,
-        valueDeserializer = IntegerDeserializer.class
+            topic = "fourth",
+            additionalProperties = {"enable.auto.commit=false"},
+            keyDeserializer = IntegerDeserializer.class,
+            valueDeserializer = IntegerDeserializer.class
     )
     private BlockingQueue<ConsumerRecord<Integer, Integer>> fourthOutputQueue;
 
@@ -107,7 +108,7 @@ class KafkaQueuesConditionTest {
         var value = "value";
 
         thirdInputQueue.offer(
-            new ProducerRecord<>("third", key, value), 10, TimeUnit.SECONDS
+                new ProducerRecord<>("third", key, value), 10, TimeUnit.SECONDS
         );
 
         ConsumerRecord<String, String> record = thirdOutputQueue.poll(10, TimeUnit.SECONDS);
@@ -122,7 +123,7 @@ class KafkaQueuesConditionTest {
         var value = 2;
 
         fourthInputQueue.offer(
-            new ProducerRecord<>("fourth", key, value), 10, TimeUnit.SECONDS
+                new ProducerRecord<>("fourth", key, value), 10, TimeUnit.SECONDS
         );
 
         ConsumerRecord<Integer, Integer> record = fourthOutputQueue.poll(10, TimeUnit.SECONDS);
